@@ -72,14 +72,20 @@ local db   -- shortcut set on PLAYER_LOGIN
 -------------------------------------------------------------------------------
 
 local RAIDS = {
-    ["ICC"]   = { "icc", "icecrown", "ice crown", "citadel" },
+    ["ICC"]   = { "icc", "icecrown", "ice crown", "citadel",
+                  "marrowgar", "lord marrowgar" },
     ["RS"]    = { "ruby sanctum", "ruby", "rs%d*", "halion" },
     ["ToC"]   = { "toc", "togc", "trial of the crusader", "trial of the grand",
-                  "crusader", "grand crusader", "anub" },
+                  "crusader", "grand crusader", "anub'arak", "jaraxxus",
+                  "lord jaraxxus" },
     ["Ulduar"]= { "ulduar", "uldu", "uld%d*", "yogg", "algalon", "freya",
-                  "hodir", "thorim", "mimiron", "vezax", "assembly" },
-    ["Naxx"]  = { "naxx", "naxxramas", "nax%d*" },
-    ["OS"]    = { "obsidian sanctum", "obsidian", "sarth", "os%d*" },
+                  "hodir", "thorim", "mimiron", "vezax", "assembly",
+                  "flame leviathan", "leviathan", "razorscale", "ignis",
+                  "xt%-002", "xt002", "deconstructor" },
+    ["Naxx"]  = { "naxx", "naxxramas", "nax%d*",
+                  "razuvious", "instructor", "noth", "plaguebringer",
+                  "patchwerk", "anub'rekhan" },
+    ["OS"]    = { "obsidian sanctum", "obsidian", "sarth", "sartharion", "os%d*" },
     ["EoE"]   = { "eye of eternity", "malygos", "eoe" },
     ["VoA"]   = { "vault of archavon", "vault", "voa", "archavon", "emalon",
                   "koralon", "toravon" },
@@ -93,6 +99,7 @@ local BUILTIN_RECRUIT_KEYWORDS = {
     "come join", "join us", "recruiting", "hosted",
     "still need", "last spot", "last slot",
     "forming", "putting together",
+    "weekly", "weekly quest", "must die",
 }
 
 local ROLE_PATTERNS = {
@@ -135,6 +142,7 @@ local MAX_ENTRIES = 200
 local filterRaid  = nil
 local filterRole  = nil
 local filterSize  = nil
+local filterText  = ""    -- free-text search bar
 
 local mainFrame
 local configFrame
@@ -246,6 +254,7 @@ end
 local function getFilteredEntries()
     pruneStale()
     local minGS = (db and db.minGS) or 0
+    local searchText = filterText and filterText:lower():trim() or ""
     local out = {}
     for _, e in ipairs(entries) do
         local dominated = false
@@ -256,6 +265,13 @@ local function getFilteredEntries()
         if minGS > 0 and e.gs then
             local n = tonumber(e.gs)
             if n and n < minGS then dominated = true end
+        end
+        -- Free-text search: match against message, sender, or raid tag
+        if searchText ~= "" then
+            local haystack = (e.message .. " " .. e.sender .. " " .. e.raid):lower()
+            if not haystack:find(searchText, 1, true) then
+                dominated = true
+            end
         end
         if not dominated then
             out[#out + 1] = e
@@ -492,7 +508,7 @@ local function createMainFrame()
 
     mainFrame = CreateFrame("Frame", "RaidFinderMainFrame", UIParent)
     mainFrame:SetWidth(560)
-    mainFrame:SetHeight(520)
+    mainFrame:SetHeight(550)
     mainFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 50)
     mainFrame:SetMovable(true)
     mainFrame:EnableMouse(true)
@@ -604,6 +620,8 @@ local function createMainFrame()
         filterRaid = nil
         filterRole = nil
         filterSize = nil
+        filterText = ""
+        if mainFrame.searchBox then mainFrame.searchBox:SetText("") end
         for _, b in ipairs(filterButtons) do
             if b.updateLook then b:updateLook() end
         end
@@ -611,9 +629,38 @@ local function createMainFrame()
     end)
 
     ---------------------------------------------------------------------------
+    -- SEARCH BAR
+    ---------------------------------------------------------------------------
+    filterY = filterY - 28
+
+    local searchLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    searchLabel:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 14, filterY)
+    searchLabel:SetText("Search:")
+    searchLabel:SetTextColor(0.8, 0.8, 0.2)
+
+    local searchBox = CreateFrame("EditBox", "RaidFinderSearchBox", mainFrame, "InputBoxTemplate")
+    searchBox:SetWidth(440)
+    searchBox:SetHeight(22)
+    searchBox:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 60, filterY + 2)
+    searchBox:SetAutoFocus(false)
+    searchBox:SetMaxLetters(100)
+    searchBox:SetFontObject("GameFontNormalSmall")
+    searchBox:SetScript("OnTextChanged", function(self)
+        filterText = self:GetText() or ""
+        refreshUI()
+    end)
+    searchBox:SetScript("OnEscapePressed", function(self)
+        self:ClearFocus()
+    end)
+    searchBox:SetScript("OnEnterPressed", function(self)
+        self:ClearFocus()
+    end)
+    mainFrame.searchBox = searchBox
+
+    ---------------------------------------------------------------------------
     -- SCROLL AREA
     ---------------------------------------------------------------------------
-    local scrollY = filterY - 30
+    local scrollY = filterY - 28
 
     scrollFrame = CreateFrame("ScrollFrame", "RaidFinderScrollFrame", mainFrame,
                               "UIPanelScrollFrameTemplate")
