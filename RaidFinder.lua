@@ -108,10 +108,7 @@ local SIZE_PATTERNS = {
     { patterns = { "10m", "10 man", "10man" }, tag = "10" },
 }
 
-local DIFF_PATTERNS = {
-    { patterns = { "heroic", "hc", "hm", "hard mode", "hardmode" }, tag = "HC" },
-    { patterns = { "normal", "nm", "reg" },                         tag = "NM" },
-}
+
 
 local function detectGS(text)
     local gs = text:match("(%d[%d%.]+)%s*k%s*gs")
@@ -198,14 +195,12 @@ local function parseMessage(text, sender, channel)
 
     local role = detectFirst(lower, ROLE_PATTERNS)
     local size = detectFirst(lower, SIZE_PATTERNS)
-    local diff = detectFirst(lower, DIFF_PATTERNS)
     local gs   = detectGS(lower)
 
     return {
         raid    = raid,
         role    = role,
         size    = size,
-        diff    = diff,
         gs      = gs,
         sender  = sender,
         channel = channel,
@@ -298,7 +293,6 @@ end
 local function tagString(entry)
     local parts = {}
     if entry.size then parts[#parts+1] = entry.size .. "m" end
-    if entry.diff then parts[#parts+1] = entry.diff end
     if entry.role then parts[#parts+1] = entry.role end
     if entry.gs   then parts[#parts+1] = entry.gs .. " GS" end
     if #parts > 0 then
