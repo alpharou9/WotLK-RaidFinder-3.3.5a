@@ -111,8 +111,14 @@ local ROLE_PATTERNS = {
 }
 
 local SIZE_PATTERNS = {
-    { patterns = { "25m", "25 man", "25man" }, tag = "25" },
-    { patterns = { "10m", "10 man", "10man" }, tag = "10" },
+    { patterns = { "25m", "25 man", "25man", " 25[^%d]", " 25$" }, tag = "25" },
+    { patterns = { "10m", "10 man", "10man", " 10[^%d]", " 10$" }, tag = "10" },
+}
+
+-- Difficulty
+local DIFF_PATTERNS = {
+    { patterns = { "heroic", "hc", "hm", "hard mode", "hardmode" }, tag = "HC" },
+    { patterns = { "normal", "nm", "reg" },                         tag = "NM" },
 }
 
 
@@ -203,12 +209,14 @@ local function parseMessage(text, sender, channel)
 
     local role = detectFirst(lower, ROLE_PATTERNS)
     local size = detectFirst(lower, SIZE_PATTERNS)
+    local diff = detectFirst(lower, DIFF_PATTERNS)
     local gs   = detectGS(lower)
 
     return {
         raid    = raid,
         role    = role,
         size    = size,
+        diff    = diff,
         gs      = gs,
         sender  = sender,
         channel = channel,
@@ -308,7 +316,8 @@ end
 
 local function tagString(entry)
     local parts = {}
-    if entry.size then parts[#parts+1] = entry.size .. "m" end
+    if entry.size then parts[#parts+1] = entry.size end
+    if entry.diff then parts[#parts+1] = entry.diff end
     if entry.role then parts[#parts+1] = entry.role end
     if entry.gs   then parts[#parts+1] = entry.gs .. " GS" end
     if #parts > 0 then
@@ -601,7 +610,7 @@ local function createMainFrame()
     fx = fx + 32
 
     for _, sz in ipairs({ "10", "25" }) do
-        local b = makeFilterBtn(mainFrame, sz .. "m", fx, filterY - 2, 40,
+        local b = makeFilterBtn(mainFrame, sz, fx, filterY - 2, 40,
             function() return filterSize end,
             function(v) filterSize = v end,
             sz)

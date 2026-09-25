@@ -14,7 +14,7 @@ Stop scrolling through Trade chat spam — let RaidFinder collect and organize i
 
 - 🔍 **Auto-scans chat** — monitors Trade, LFG, General, Say, Yell, and Guild channels
 - 🏰 **Detects all WotLK raids** — ICC, RS, ToC, Ulduar, Naxx, OS, EoE, VoA, Onyxia
-- 🎯 **Smart parsing** — extracts raid name, size (10/25), role needed (Tank/Heal/DPS), and GearScore requirements
+- 🎯 **Smart parsing** — extracts raid name, size (10/25), difficulty (Normal/HC), role needed (Tank/Heal/DPS), and GearScore requirements
 - 🔎 **Filter buttons** — quickly filter by raid, role, or size
 - 💬 **One-click whisper** — click any entry to whisper the recruiter
 - 🔔 **Sound alerts** — optional per-raid sound notifications
