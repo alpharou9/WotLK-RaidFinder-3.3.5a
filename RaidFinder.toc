@@ -1,0 +1,8 @@
+## Interface: 30300
+## Title: RaidFinder
+## Notes: Scans chat for raid recruitment messages. Filter by raid, role, and size. /rf to toggle.
+## Author: Antigravity
+## Version: 1.0.0
+## SavedVariables: RaidFinderDB
+
+RaidFinder.lua
