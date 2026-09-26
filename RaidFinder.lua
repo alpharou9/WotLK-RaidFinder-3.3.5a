@@ -111,14 +111,14 @@ local ROLE_PATTERNS = {
 }
 
 local SIZE_PATTERNS = {
-    { patterns = { "25m", "25 man", "25man", " 25[^%d]", " 25$" }, tag = "25" },
-    { patterns = { "10m", "10 man", "10man", " 10[^%d]", " 10$" }, tag = "10" },
+    { patterns = { "[^%d]25[^%d]", "[^%d]25$", "^25[^%d]", "^25$" }, tag = "25" },
+    { patterns = { "[^%d]10[^%d]", "[^%d]10$", "^10[^%d]", "^10$" }, tag = "10" },
 }
 
--- Difficulty
 local DIFF_PATTERNS = {
-    { patterns = { "heroic", "hc", "hm", "hard mode", "hardmode" }, tag = "HC" },
-    { patterns = { "normal", "nm", "reg" },                         tag = "NM" },
+    -- [^e] avoids accidentally matching "10healers" or "10need"
+    { patterns = { "heroic", "hc", "hm", "hard mode", "hardmode", "10h[^e]", "25h[^e]", "10h$", "25h$" }, tag = "HC" },
+    { patterns = { "normal", "nm", "reg", "10n[^e]", "25n[^e]", "10n$", "25n$" },                         tag = "NM" },
 }
 
 
